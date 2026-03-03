@@ -19,6 +19,21 @@
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.theme-midnight {
+  --bg-color: #050505;
+  --accent-color: #3b82f6;
+  --accent-hover: #2563eb;
+  --glass-bg: rgba(10, 10, 10, 0.8);
+}
+
+.theme-gold {
+  --bg-color: #1a160d;
+  --accent-color: #fbbf24;
+  --accent-hover: #f59e0b;
+  --glass-bg: rgba(28, 24, 15, 0.8);
+  --glass-border: rgba(251, 191, 36, 0.15);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;

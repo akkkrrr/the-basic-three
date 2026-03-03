@@ -1,14 +1,19 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useLanguage } from '../LanguageContext';
 import { trackEvent } from '../utils/analytics';
+import { usePro } from '../ProContext';
+import Tesseract from 'tesseract.js';
 
 export default function EasySplit() {
     const { t, getCurrencySymbol, formatMoney } = useLanguage();
+    const { isPro, setShowPaywall } = usePro();
     const currency = getCurrencySymbol();
 
     const [total, setTotal] = useState('');
     const [splitType, setSplitType] = useState('even');
     const [numPeople, setNumPeople] = useState(2);
+    const [isScanning, setIsScanning] = useState(false);
+    const fileInputRef = useRef(null);
 
     // We initialize names with translations if needed, but for simplicity we'll just use a generic name or blank
     const [customSplits, setCustomSplits] = useState([
@@ -55,6 +60,64 @@ export default function EasySplit() {
                 .replace('{amount}', formattedAmount);
         }
         return `https://wa.me/?text=${encodeURIComponent(text)}`;
+    };
+
+    const handleScanClick = () => {
+        if (!isPro) {
+            setShowPaywall(true);
+            return;
+        }
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
+        }
+    };
+
+    const handleFileUpload = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        setIsScanning(true);
+        try {
+            const result = await Tesseract.recognize(file, 'eng');
+            const text = result.data.text;
+
+            // Regex to pick up numbers that look like prices (e.g. 12.99, 5,50, 42)
+            const priceRegex = /\d+([.,]\d{2})?/g;
+            const matches = text.match(priceRegex);
+
+            if (matches && matches.length > 0) {
+                // Parse and sort descending to guess the biggest might be total, others items
+                const numbers = matches.map(m => parseFloat(m.replace(',', '.'))).filter(n => !isNaN(n) && n > 0);
+
+                if (numbers.length > 0) {
+                    const sorted = numbers.sort((a, b) => b - a);
+                    if (!totalAmount) {
+                        setTotal(sorted[0].toString()); // Set highest as total
+                    }
+
+                    // Take the reasonably sized numbers as items
+                    const possibleItems = sorted.slice(totalAmount ? 0 : 1).filter(n => n < (totalAmount || sorted[0]));
+
+                    if (possibleItems.length > 0) {
+                        const newSplits = possibleItems.map((val, idx) => ({
+                            id: Date.now() + idx,
+                            name: `Tavara/Item ${idx + 1}`,
+                            amount: val.toString()
+                        }));
+                        // Replace or append 
+                        setCustomSplits(newSplits.length >= 2 ? newSplits : [...customSplits, ...newSplits]);
+                    }
+                }
+            } else {
+                alert(t('easySplit', 'scanError'));
+            }
+        } catch (err) {
+            console.error(err);
+            alert(t('easySplit', 'scanError'));
+        } finally {
+            setIsScanning(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
     };
 
     return (
@@ -210,12 +273,37 @@ export default function EasySplit() {
                             ))}
                         </div>
 
-                        <button
-                            onClick={addPerson}
-                            style={{ marginTop: '1.5rem', width: '100%', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)' }}
-                        >
-                            {t('easySplit', 'addPerson')}
-                        </button>
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '1.5rem' }}>
+                            <button
+                                onClick={addPerson}
+                                style={{ flex: 1, background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)' }}
+                            >
+                                {t('easySplit', 'addPerson')}
+                            </button>
+                            <button
+                                onClick={handleScanClick}
+                                disabled={isScanning}
+                                style={{
+                                    flex: 1,
+                                    background: isPro ? 'linear-gradient(135deg, #10b981, #059669)' : 'rgba(255,255,255,0.05)',
+                                    color: isPro ? '#fff' : 'var(--text-secondary)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '5px'
+                                }}
+                            >
+                                {isScanning ? t('easySplit', 'scanning') : t('easySplit', 'scanReceipt')}
+                                {!isPro && '🔒'}
+                            </button>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                ref={fileInputRef}
+                                style={{ display: 'none' }}
+                                onChange={handleFileUpload}
+                            />
+                        </div>
                     </div>
                 )}
             </div>

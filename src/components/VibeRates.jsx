@@ -8,7 +8,7 @@ export default function VibeRates() {
     const [baseCurrency, setBaseCurrency] = useState('USD');
     const [targetCurrency, setTargetCurrency] = useState('MXN');
 
-    const { rates, loading, error } = useExchangeRates(baseCurrency);
+    const { rates, loading, error, isOfflineMode } = useExchangeRates(baseCurrency);
 
     // Load favorites from local storage
     const [favorites, setFavorites] = useState(() => {
@@ -131,6 +131,11 @@ export default function VibeRates() {
                 {rates && rates[targetCurrency] && !loading && !error && (
                     <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                         1 {baseCurrency} = {rates[targetCurrency].toFixed(4)} {targetCurrency}
+                        {isOfflineMode && (
+                            <span style={{ marginLeft: '10px', color: '#FFD700', fontWeight: 'bold' }}>
+                                (⚡ Offline)
+                            </span>
+                        )}
                     </div>
                 )}
             </div>
