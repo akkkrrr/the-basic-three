@@ -11,11 +11,11 @@
   --glass-bg: rgba(20, 22, 33, 0.6);
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  
+
   --radius-lg: 24px;
   --radius-md: 16px;
   --radius-sm: 8px;
-  
+
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -33,7 +33,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  background-image: 
+  background-image:
     radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.15), transparent 30%),
     radial-gradient(circle at 90% 80%, rgba(236, 72, 153, 0.15), transparent 30%);
   overflow-x: hidden;
@@ -72,16 +72,27 @@ body {
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.4s ease-out forwards;
+  animation: fadeIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 /* Typography */
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   font-weight: 600;
   letter-spacing: -0.02em;
 }
@@ -94,7 +105,9 @@ h1, h2, h3 {
 }
 
 /* Form Elements */
-input, select, button {
+input,
+select,
+button {
   font-family: inherit;
   font-size: 1rem;
 }
@@ -112,7 +125,8 @@ input, select, button {
   font-weight: 500;
 }
 
-input, select {
+input,
+select {
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid var(--glass-border);
   color: var(--text-primary);
@@ -123,7 +137,8 @@ input, select {
   width: 100%;
 }
 
-input:focus, select:focus {
+input:focus,
+select:focus {
   border-color: var(--accent-color);
   box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
 }

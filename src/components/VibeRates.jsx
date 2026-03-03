@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useLanguage } from '../LanguageContext';
+import { useExchangeRates } from '../hooks/useExchangeRates';
 
 export default function VibeRates() {
     const { t } = useLanguage();
-    const [rates, setRates] = useState(null);
     const [amount, setAmount] = useState(1);
     const [baseCurrency, setBaseCurrency] = useState('USD');
     const [targetCurrency, setTargetCurrency] = useState('MXN');
-    const [loading, setLoading] = useState(true);
+
+    const { rates, loading, error } = useExchangeRates(baseCurrency);
 
     // Load favorites from local storage
     const [favorites, setFavorites] = useState(() => {
@@ -16,24 +17,6 @@ export default function VibeRates() {
     });
 
     const currencies = ['USD', 'MXN', 'EUR', 'GBP', 'CAD', 'SEK'];
-
-    useEffect(() => {
-        const fetchRates = async () => {
-            setLoading(true);
-            try {
-                const res = await fetch(`https://api.frankfurter.app/latest?from=${baseCurrency}`);
-                const data = await res.json();
-                // Frankfurter doesn't return the base currency in the rates, so we add it manually
-                const fullRates = { ...data.rates, [baseCurrency]: 1 };
-                setRates(fullRates);
-            } catch (error) {
-                console.error("Failed to fetch rates:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchRates();
-    }, [baseCurrency]);
 
     const handleSwap = () => {
         setBaseCurrency(targetCurrency);
@@ -137,9 +120,15 @@ export default function VibeRates() {
             <div className="result-box">
                 <h3>{t('vibeRates', 'result')} ({targetCurrency})</h3>
                 <div className="amount">
-                    {loading ? t('vibeRates', 'loading') : convertedAmount}
+                    {loading ? (
+                        t('vibeRates', 'loading')
+                    ) : error ? (
+                        <span style={{ fontSize: '1rem', color: '#ef4444' }}>{error}</span>
+                    ) : (
+                        convertedAmount
+                    )}
                 </div>
-                {rates && rates[targetCurrency] && !loading && (
+                {rates && rates[targetCurrency] && !loading && !error && (
                     <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                         1 {baseCurrency} = {rates[targetCurrency].toFixed(4)} {targetCurrency}
                     </div>

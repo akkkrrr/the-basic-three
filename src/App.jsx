@@ -49,8 +49,10 @@ function App() {
         </button>
       </header>
 
-      <main className="app-container glass-panel animate-fade-in">
-        {renderContent()}
+      <main className="app-container glass-panel">
+        <div key={activeTab} className="animate-fade-in">
+          {renderContent()}
+        </div>
       </main>
     </>
   )
