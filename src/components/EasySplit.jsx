@@ -54,7 +54,7 @@ export default function EasySplit() {
                 .replace('{total}', formattedTotal)
                 .replace('{amount}', formattedAmount);
         }
-        return `whatsapp://send?text=${encodeURIComponent(text)}`;
+        return `https://wa.me/?text=${encodeURIComponent(text)}`;
     };
 
     return (
