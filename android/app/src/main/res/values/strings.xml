@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">the-basic-three</string>
+    <string name="title_activity_main">the-basic-three</string>
+    <string name="package_name">com.viberates.basicthree</string>
+    <string name="custom_url_scheme">com.viberates.basicthree</string>
+</resources>
