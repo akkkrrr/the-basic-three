@@ -1,19 +1,21 @@
 import { useState, useEffect } from 'react';
+import { useLanguage } from '../LanguageContext';
 
 export default function VibeRates() {
+    const { t } = useLanguage();
     const [rates, setRates] = useState(null);
     const [amount, setAmount] = useState(1);
-    const [baseCurrency, setBaseCurrency] = useState('EUR');
-    const [targetCurrency, setTargetCurrency] = useState('USD');
+    const [baseCurrency, setBaseCurrency] = useState('USD');
+    const [targetCurrency, setTargetCurrency] = useState('MXN');
     const [loading, setLoading] = useState(true);
 
     // Load favorites from local storage
     const [favorites, setFavorites] = useState(() => {
         const saved = localStorage.getItem('vibeRatesFavorites');
-        return saved ? JSON.parse(saved) : ['EUR-USD', 'EUR-SEK'];
+        return saved ? JSON.parse(saved) : ['USD-MXN', 'EUR-USD'];
     });
 
-    const currencies = ['EUR', 'USD', 'GBP', 'SEK'];
+    const currencies = ['USD', 'MXN', 'EUR', 'GBP', 'CAD', 'SEK'];
 
     useEffect(() => {
         const fetchRates = async () => {
@@ -65,13 +67,13 @@ export default function VibeRates() {
     return (
         <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h2><span className="text-gradient">Vibe Rates</span></h2>
+                <h2><span className="text-gradient">{t('vibeRates', 'title')}</span></h2>
                 <button
                     onClick={toggleFavorite}
                     style={{ background: 'transparent', padding: '8px', color: isFavorite ? 'var(--accent-color)' : 'var(--text-secondary)' }}
-                    title="Tallenna suosikiksi"
+                    title={t('vibeRates', 'saveFav')}
                 >
-                    {isFavorite ? '★ Suosikki' : '☆ Tallenna'}
+                    {isFavorite ? t('vibeRates', 'savedFav') : t('vibeRates', 'saveFav')}
                 </button>
             </div>
 
@@ -98,7 +100,7 @@ export default function VibeRates() {
             )}
 
             <div className="input-group">
-                <label>Määrä</label>
+                <label>{t('vibeRates', 'amount')}</label>
                 <input
                     type="number"
                     value={amount}
@@ -110,14 +112,14 @@ export default function VibeRates() {
 
             <div className="grid-2" style={{ alignItems: 'end', marginBottom: '1.5rem' }}>
                 <div className="input-group" style={{ marginBottom: 0 }}>
-                    <label>Mistä</label>
+                    <label>{t('vibeRates', 'from')}</label>
                     <select value={baseCurrency} onChange={(e) => setBaseCurrency(e.target.value)}>
                         {currencies.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                 </div>
 
                 <div className="input-group" style={{ marginBottom: 0 }}>
-                    <label>Mihin</label>
+                    <label>{t('vibeRates', 'to')}</label>
                     <select value={targetCurrency} onChange={(e) => setTargetCurrency(e.target.value)}>
                         {currencies.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
@@ -129,13 +131,13 @@ export default function VibeRates() {
                 style={{ marginBottom: '1rem', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)' }}
                 onClick={handleSwap}
             >
-                ⇅ Vaihda Päittäin
+                {t('vibeRates', 'swap')}
             </button>
 
             <div className="result-box">
-                <h3>Tulos ({targetCurrency})</h3>
+                <h3>{t('vibeRates', 'result')} ({targetCurrency})</h3>
                 <div className="amount">
-                    {loading ? 'Ladataan...' : convertedAmount}
+                    {loading ? t('vibeRates', 'loading') : convertedAmount}
                 </div>
                 {rates && rates[targetCurrency] && !loading && (
                     <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>

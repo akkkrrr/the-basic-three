@@ -2,9 +2,11 @@ import { useState } from 'react'
 import VibeRates from './components/VibeRates'
 import QuickTip from './components/QuickTip'
 import EasySplit from './components/EasySplit'
+import { useLanguage } from './LanguageContext'
 
 function App() {
   const [activeTab, setActiveTab] = useState('viberates')
+  const { language, setLanguage, t } = useLanguage()
 
   const renderContent = () => {
     switch (activeTab) {
@@ -17,24 +19,33 @@ function App() {
 
   return (
     <>
+      <div style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 100 }}>
+        <button
+          onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
+          className="lang-toggle"
+        >
+          {language === 'en' ? 'ES' : 'EN'}
+        </button>
+      </div>
+
       <header className="nav-header">
         <button
           className={`nav-link ${activeTab === 'viberates' ? 'active' : ''}`}
           onClick={() => setActiveTab('viberates')}
         >
-          Valuuttamuunnin
+          {t('nav', 'vibeRates')}
         </button>
         <button
           className={`nav-link ${activeTab === 'quicktip' ? 'active' : ''}`}
           onClick={() => setActiveTab('quicktip')}
         >
-          Tippilaskuri
+          {t('nav', 'quickTip')}
         </button>
         <button
           className={`nav-link ${activeTab === 'easysplit' ? 'active' : ''}`}
           onClick={() => setActiveTab('easysplit')}
         >
-          Kulusplitteri
+          {t('nav', 'easySplit')}
         </button>
       </header>
 

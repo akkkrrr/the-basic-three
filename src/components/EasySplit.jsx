@@ -1,12 +1,18 @@
 import { useState } from 'react';
+import { useLanguage } from '../LanguageContext';
 
 export default function EasySplit() {
+    const { t, getCurrencySymbol, formatMoney } = useLanguage();
+    const currency = getCurrencySymbol();
+
     const [total, setTotal] = useState('');
     const [splitType, setSplitType] = useState('even');
     const [numPeople, setNumPeople] = useState(2);
+
+    // We initialize names with translations if needed, but for simplicity we'll just use a generic name or blank
     const [customSplits, setCustomSplits] = useState([
-        { id: 1, name: 'Henkilö 1', amount: '' },
-        { id: 2, name: 'Henkilö 2', amount: '' }
+        { id: 1, name: '', amount: '' },
+        { id: 2, name: '', amount: '' }
     ]);
 
     const totalAmount = parseFloat(total) || 0;
@@ -16,7 +22,7 @@ export default function EasySplit() {
     };
 
     const addPerson = () => {
-        setCustomSplits([...customSplits, { id: Date.now(), name: `Henkilö ${customSplits.length + 1}`, amount: '' }]);
+        setCustomSplits([...customSplits, { id: Date.now(), name: '', amount: '' }]);
     };
 
     const removePerson = (id) => {
@@ -25,7 +31,7 @@ export default function EasySplit() {
         }
     };
 
-    const evenAmount = totalAmount > 0 && numPeople > 0 ? (totalAmount / numPeople).toFixed(2) : '0.00';
+    const evenAmount = totalAmount > 0 && numPeople > 0 ? (totalAmount / numPeople) : 0;
 
     let customTotal = 0;
     if (splitType === 'custom') {
@@ -33,11 +39,19 @@ export default function EasySplit() {
     }
 
     const generateWhatsAppLink = (amount, name = '') => {
+        const formattedTotal = `${currency}${formatMoney(totalAmount)}`;
+        const formattedAmount = `${currency}${formatMoney(amount)}`;
+
         let text;
-        if (name && name.toLowerCase() !== 'henkilö' && !name.toLowerCase().startsWith('henkilö ')) {
-            text = `Moikka ${name}! 👋\nMeidän yhteisen laskun summa oli ${totalAmount.toFixed(2)}€. Sinun osuutesi on ${parseFloat(amount).toFixed(2)}€.\nSopiiko laittaa MobilePaylla? 💸`;
+        if (name && name.trim() !== '') {
+            text = t('easySplit', 'whatsappMsgCustom')
+                .replace('{name}', name)
+                .replace('{total}', formattedTotal)
+                .replace('{amount}', formattedAmount);
         } else {
-            text = `Moikka! 👋\nMeidän yhteisen laskun summa oli ${totalAmount.toFixed(2)}€. Sinun osuutesi on ${parseFloat(amount).toFixed(2)}€.\nSopiiko laittaa MobilePaylla? 💸`;
+            text = t('easySplit', 'whatsappMsgEven')
+                .replace('{total}', formattedTotal)
+                .replace('{amount}', formattedAmount);
         }
         return `whatsapp://send?text=${encodeURIComponent(text)}`;
     };
@@ -45,11 +59,11 @@ export default function EasySplit() {
     return (
         <div>
             <h2 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
-                <span className="text-gradient">Easy Split</span>
+                <span className="text-gradient">{t('easySplit', 'title')}</span>
             </h2>
 
             <div className="input-group">
-                <label>Kokonaissumma (€)</label>
+                <label>{t('easySplit', 'totalAmount')} ({currency})</label>
                 <input
                     type="number"
                     value={total}
@@ -69,7 +83,7 @@ export default function EasySplit() {
                         color: splitType === 'even' ? '#fff' : 'var(--text-secondary)',
                     }}
                 >
-                    Tasajako
+                    {t('easySplit', 'evenSplit')}
                 </button>
                 <button
                     onClick={() => setSplitType('custom')}
@@ -79,7 +93,7 @@ export default function EasySplit() {
                         color: splitType === 'custom' ? '#fff' : 'var(--text-secondary)',
                     }}
                 >
-                    Omat osuudet
+                    {t('easySplit', 'customSplit')}
                 </button>
             </div>
 
@@ -87,7 +101,7 @@ export default function EasySplit() {
                 {splitType === 'even' ? (
                     <div>
                         <div className="input-group" style={{ marginBottom: '1.5rem' }}>
-                            <label style={{ textAlign: 'center', marginBottom: '1rem' }}>Henkilöiden määrä</label>
+                            <label style={{ textAlign: 'center', marginBottom: '1rem' }}>{t('easySplit', 'numPeople')}</label>
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1.5rem' }}>
                                 <button
                                     onClick={() => setNumPeople(Math.max(2, numPeople - 1))}
@@ -102,9 +116,9 @@ export default function EasySplit() {
                         </div>
 
                         <div className="result-box" style={{ marginTop: 0 }}>
-                            <h3>Osuus per hlö</h3>
+                            <h3>{t('easySplit', 'sharePerPerson')}</h3>
                             <div className="amount" style={{ fontSize: '2.5rem' }}>
-                                {evenAmount}€
+                                {currency}{formatMoney(evenAmount)}
                             </div>
 
                             <a
@@ -122,7 +136,7 @@ export default function EasySplit() {
                                     boxShadow: '0 4px 12px rgba(37, 211, 102, 0.3)'
                                 }}
                             >
-                                💬 Jaa WhatsAppissa
+                                {t('easySplit', 'shareWhatsApp')}
                             </a>
                         </div>
                     </div>
@@ -130,11 +144,11 @@ export default function EasySplit() {
                     <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', padding: '0.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
                             <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                                Jaettu: <span style={{ color: customTotal > totalAmount && totalAmount > 0 ? '#ef4444' : '#fff', fontWeight: '600' }}>{customTotal.toFixed(2)}€</span>
+                                {t('easySplit', 'allocated')} <span style={{ color: customTotal > totalAmount && totalAmount > 0 ? '#ef4444' : '#fff', fontWeight: '600' }}>{currency}{formatMoney(customTotal)}</span>
                             </div>
                             {customTotal < totalAmount && totalAmount > 0 && (
                                 <div style={{ color: 'var(--accent-color)', fontSize: '0.9rem', fontWeight: '500' }}>
-                                    Jäljellä: {(totalAmount - customTotal).toFixed(2)}€
+                                    {t('easySplit', 'remaining')} {currency}{formatMoney(totalAmount - customTotal)}
                                 </div>
                             )}
                         </div>
@@ -147,7 +161,7 @@ export default function EasySplit() {
                                         value={person.name}
                                         onChange={(e) => handleCustomChange(person.id, 'name', e.target.value)}
                                         style={{ flex: 3, padding: '12px 10px' }}
-                                        placeholder={`Nimi ${index + 1}`}
+                                        placeholder={`${t('easySplit', 'personDefaultName')} ${index + 1}`}
                                     />
                                     <input
                                         type="number"
@@ -168,7 +182,7 @@ export default function EasySplit() {
                                     {person.amount > 0 && (
                                         <a
                                             href={generateWhatsAppLink(person.amount, person.name)}
-                                            title="Jaa WhatsAppissa"
+                                            title={t('easySplit', 'shareWhatsApp')}
                                             style={{
                                                 background: '#25D366',
                                                 color: '#fff',
@@ -191,7 +205,7 @@ export default function EasySplit() {
                             onClick={addPerson}
                             style={{ marginTop: '1.5rem', width: '100%', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)' }}
                         >
-                            + Lisää henkilö
+                            {t('easySplit', 'addPerson')}
                         </button>
                     </div>
                 )}

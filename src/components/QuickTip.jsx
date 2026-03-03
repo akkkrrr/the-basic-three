@@ -1,24 +1,31 @@
 import { useState } from 'react';
+import { useLanguage } from '../LanguageContext';
 
 export default function QuickTip() {
+    const { t, getCurrencySymbol, formatMoney } = useLanguage();
+    const currency = getCurrencySymbol();
+
     const [bill, setBill] = useState('');
     const [tipPercentage, setTipPercentage] = useState(15);
     const [roundTotal, setRoundTotal] = useState(false);
 
     const [separateTax, setSeparateTax] = useState(false);
-    const [taxPercentage, setTaxPercentage] = useState(14); // Default to restaurant VAT in Finland
+    const [taxAmountInput, setTaxAmountInput] = useState(''); // Instead of percentage, we use raw tax amount
 
     const billAmount = parseFloat(bill) || 0;
+    const taxAmount = parseFloat(taxAmountInput) || 0;
 
     // Calculate base for tip
     let tipBase = billAmount;
-    let taxAmount = 0;
 
     if (separateTax && billAmount > 0) {
-        // Alv is included in billAmount, calculate tax free part
-        const taxFree = billAmount / (1 + taxPercentage / 100);
-        taxAmount = billAmount - taxFree;
-        tipBase = taxFree;
+        // If tax is separated, tip base is bill minus tax
+        // This assumes billAmount includes the tax. If it doesn't, logic would be different.
+        // Usually in America, receipt says Subtotal + Tax = Total. 
+        // We'll let user put the Subtotal directly if they want, but if they put Total, we subtract Tax to tip on base.
+        if (taxAmount < billAmount) {
+            tipBase = billAmount - taxAmount;
+        }
     }
 
     // Calculate tip
@@ -41,11 +48,11 @@ export default function QuickTip() {
     return (
         <div>
             <h2 style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
-                <span className="text-gradient">Quick Tip</span>
+                <span className="text-gradient">{t('quickTip', 'title')}</span>
             </h2>
 
             <div className="input-group">
-                <label>Laskun loppusumma (€)</label>
+                <label>{t('quickTip', 'billAmount')} ({currency})</label>
                 <input
                     type="number"
                     value={bill}
@@ -57,7 +64,7 @@ export default function QuickTip() {
             </div>
 
             <div style={{ display: 'flex', gap: '8px', marginBottom: '1.5rem' }}>
-                {[10, 15, 20].map(p => (
+                {[10, 15, 18, 20, 25].map(p => (
                     <button
                         key={p}
                         onClick={() => setTipPercentage(p)}
@@ -65,6 +72,7 @@ export default function QuickTip() {
                             flex: 1,
                             background: tipPercentage === p ? 'var(--accent-color)' : 'rgba(255,255,255,0.05)',
                             color: tipPercentage === p ? '#fff' : 'var(--text-secondary)',
+                            padding: '12px 0px'
                         }}
                     >
                         {p}%
@@ -80,18 +88,20 @@ export default function QuickTip() {
                         onChange={(e) => setSeparateTax(e.target.checked)}
                         style={{ width: '20px', height: '20px', margin: 0 }}
                     />
-                    <span style={{ fontSize: '0.95rem' }}>Laske tippi verottomasta summasta</span>
+                    <span style={{ fontSize: '0.95rem' }}>{t('quickTip', 'excludeTax')}</span>
                 </label>
 
                 {separateTax && (
                     <div className="input-group" style={{ marginBottom: '0.5rem', marginTop: '0.5rem' }}>
-                        <label>ALV % (verkkokauppa/ravintola)</label>
-                        <select value={taxPercentage} onChange={(e) => setTaxPercentage(parseFloat(e.target.value))}>
-                            <option value={25.5}>25.5% (Yleinen)</option>
-                            <option value={14}>14% (Ruoka & ravintola)</option>
-                            <option value={10}>10% (Henkilökuljetukset ym.)</option>
-                            <option value={0}>0%</option>
-                        </select>
+                        <label>{t('quickTip', 'taxAmount')}</label>
+                        <input
+                            type="number"
+                            value={taxAmountInput}
+                            onChange={(e) => setTaxAmountInput(e.target.value)}
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                        />
                     </div>
                 )}
 
@@ -104,26 +114,26 @@ export default function QuickTip() {
                         onChange={(e) => setRoundTotal(e.target.checked)}
                         style={{ width: '20px', height: '20px', margin: 0 }}
                     />
-                    <span style={{ fontSize: '0.95rem' }}>Pyöristä loppusumma tasaeuroon</span>
+                    <span style={{ fontSize: '0.95rem' }}>{t('quickTip', 'roundTotal')}</span>
                 </label>
             </div>
 
             <div className="grid-2">
                 <div className="result-box" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.1)' }}>
-                    <h3>Tippiosa</h3>
+                    <h3>{t('quickTip', 'tipAmount')}</h3>
                     <div className="amount" style={{ fontSize: '1.8rem' }}>
-                        {tipAmount.toFixed(2)}€
+                        {currency}{formatMoney(tipAmount)}
                     </div>
                     {separateTax && billAmount > 0 && (
                         <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
-                            Veroton pohja: {tipBase.toFixed(2)}€
+                            {t('quickTip', 'taxBase')}: {currency}{formatMoney(tipBase)}
                         </div>
                     )}
                 </div>
                 <div className="result-box">
-                    <h3>Yhteensä</h3>
+                    <h3>{t('quickTip', 'total')}</h3>
                     <div className="amount" style={{ fontSize: '1.8rem' }}>
-                        {totalWithTip.toFixed(2)}€
+                        {currency}{formatMoney(totalWithTip)}
                     </div>
                 </div>
             </div>
