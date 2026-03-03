@@ -1,0 +1,16 @@
+{
+    "short_name": "Vuoto",
+    "name": "The Basic Three",
+    "icons": [
+        {
+            "src": "/icon.png",
+            "type": "image/png",
+            "sizes": "512x512",
+            "purpose": "any maskable"
+        }
+    ],
+    "start_url": ".",
+    "display": "standalone",
+    "theme_color": "#0f111a",
+    "background_color": "#0f111a"
+}
