@@ -2,13 +2,13 @@ export const translations = {
     en: {
         // Navigation
         nav: {
-            vibeRates: "Vibe Rates",
+            vibeRates: "Live Rates",
             quickTip: "Quick Tip",
             easySplit: "Easy Split"
         },
-        // Vibe Rates
+        // Live Rates
         vibeRates: {
-            title: "Vibe Rates",
+            title: "Live Rates",
             saveFav: "☆ Save",
             savedFav: "★ Saved",
             amount: "Amount",

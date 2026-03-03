@@ -19,10 +19,11 @@ function App() {
 
   return (
     <>
-      <div style={{ position: 'absolute', top: '1rem', right: '1rem', zIndex: 100 }}>
+      <div style={{ width: '100%', maxWidth: '500px', margin: '0 auto', display: 'flex', justifyContent: 'flex-end', padding: '1rem 1rem 0', zIndex: 100 }}>
         <button
           onClick={() => setLanguage(language === 'en' ? 'es' : 'en')}
           className="lang-toggle"
+          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', padding: '6px 16px', borderRadius: '16px', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 'bold' }}
         >
           {language === 'en' ? 'ES' : 'EN'}
         </button>
