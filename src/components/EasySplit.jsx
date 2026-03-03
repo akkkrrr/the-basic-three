@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useLanguage } from '../LanguageContext';
+import { trackEvent } from '../utils/analytics';
 
 export default function EasySplit() {
     const { t, getCurrencySymbol, formatMoney } = useLanguage();
@@ -123,6 +124,7 @@ export default function EasySplit() {
 
                             <a
                                 href={generateWhatsAppLink(evenAmount)}
+                                onClick={() => trackEvent('whatsapp_share_clicked', { split_type: 'even', numPeople, amount: evenAmount })}
                                 style={{
                                     display: 'inline-block',
                                     marginTop: '1.5rem',
@@ -142,13 +144,19 @@ export default function EasySplit() {
                     </div>
                 ) : (
                     <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', padding: '0.5rem', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
-                            <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                                {t('easySplit', 'allocated')} <span style={{ color: customTotal > totalAmount && totalAmount > 0 ? '#ef4444' : '#fff', fontWeight: '600' }}>{currency}{formatMoney(customTotal)}</span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', padding: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('easySplit', 'allocated')}</span>
+                                <span style={{ color: customTotal > totalAmount && totalAmount > 0 ? '#ef4444' : '#fff', fontWeight: '700', fontSize: '1.4rem' }}>
+                                    {currency}{formatMoney(customTotal)}
+                                </span>
                             </div>
                             {customTotal < totalAmount && totalAmount > 0 && (
-                                <div style={{ color: 'var(--accent-color)', fontSize: '0.9rem', fontWeight: '500' }}>
-                                    {t('easySplit', 'remaining')} {currency}{formatMoney(totalAmount - customTotal)}
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                                    <span style={{ color: 'var(--accent-color)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('easySplit', 'remaining')}</span>
+                                    <span style={{ color: 'var(--accent-color)', fontWeight: '700', fontSize: '1.4rem' }}>
+                                        {currency}{formatMoney(totalAmount - customTotal)}
+                                    </span>
                                 </div>
                             )}
                         </div>
@@ -182,6 +190,7 @@ export default function EasySplit() {
                                     {person.amount > 0 && (
                                         <a
                                             href={generateWhatsAppLink(person.amount, person.name)}
+                                            onClick={() => trackEvent('whatsapp_share_clicked', { split_type: 'custom', amount: person.amount, hasName: !!person.name })}
                                             title={t('easySplit', 'shareWhatsApp')}
                                             style={{
                                                 background: '#25D366',
